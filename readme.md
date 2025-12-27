@@ -104,7 +104,7 @@ pip install pyinstaller
 
 ```bash
 source venv/bin/activate
-pyinstaller --onedir --windowed --name STL_Fixer stl_fixer.py
+pyinstaller --onefile --windowed --name STL_Fixer stl_fixer.py
 ```
 
 The executable will be in the `dist/` folder: `dist/STL_Fixer`
@@ -118,7 +118,7 @@ pyinstaller --onedir --windowed --name STL_Fixer stl_fixer.py
 
 ```cmd
 venv\Scripts\activate.bat
-pyinstaller --onedir --windowed --name STL_Fixer.exe stl_fixer.py
+pyinstaller --onefile --windowed --name STL_Fixer.exe stl_fixer.py
 ```
 
 The executable will be in the `dist\` folder: `dist\STL_Fixer.exe`
@@ -127,14 +127,14 @@ The executable will be in the `dist\` folder: `dist\STL_Fixer.exe`
 
 ```bash
 source venv/bin/activate
-pyinstaller --onedir --windowed --name STL_Fixer stl_fixer.py
+pyinstaller --onefile --windowed --name STL_Fixer stl_fixer.py
 ```
 
 The executable will be in the `dist/` folder: `dist/STL_Fixer`
 
 ### PyInstaller Options Explained
 
-- `--onedir`: Creates a single executable file
+- `--onefile`: Creates a single executable file
 - `--windowed`: Hides the console window (GUI mode)
 - `--name`: Sets the name of the executable
 - `--icon`: (Optional) Sets a custom icon for the executable
