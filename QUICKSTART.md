@@ -91,6 +91,11 @@ Find the app in `dist/STL_Fixer`
 chmod +x *.sh
 ```
 
+**"No module named install" after running `python -m install ...`:**
+```bash
+python -m pip install scipy networkx
+```
+
 **"Python not found" on Windows:**
 - Download Python from [python.org](https://www.python.org/downloads/)
 - During installation, check "Add Python to PATH"

@@ -10,13 +10,18 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
 
 # Check if virtual environment exists
+PYTHON_APP="$SCRIPT_DIR/app/bin/python"
+PYTHON_VENV="$SCRIPT_DIR/venv/bin/python"
+
+if [ -x "$PYTHON_APP" ]; then
+    # Prefer the repo's embedded env if present
+    "$PYTHON_APP" "$SCRIPT_DIR/stl_fixer.py"
+    exit $?
+fi
+
 if [ ! -d "venv" ]; then
     echo "Virtual environment not found. Running setup..."
     ./setup_linux.sh
 fi
 
-# Activate virtual environment
-source venv/bin/activate
-
-# Run the application
-python stl_fixer.py
+"$PYTHON_VENV" "$SCRIPT_DIR/stl_fixer.py"

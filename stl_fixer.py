@@ -7,6 +7,69 @@ A cross-platform GUI application to fix non-manifold edges in STL files for 3D p
 import sys
 import os
 from pathlib import Path
+
+
+def _dependency_error_message(missing: list[str]) -> str:
+    joined = ", ".join(missing)
+    base = (
+        "Missing Python dependencies: " + joined + "\n\n"
+        "Install with:\n"
+        "  python -m pip install -r requirements.txt\n\n"
+        "If you're using the repo embedded env, run:\n"
+        "  ./app/bin/python -m pip install -r requirements.txt\n"
+    )
+    return base
+
+
+def _require_imports():
+    missing: list[str] = []
+
+    try:
+        import tkinter as tk  # noqa: F401
+        from tkinter import filedialog, messagebox  # noqa: F401
+    except Exception:
+        # tkinter is optional for some environments; fail later with a messagebox fallback.
+        missing.append("tkinter")
+
+    try:
+        import trimesh  # noqa: F401
+    except ModuleNotFoundError:
+        missing.append("trimesh")
+
+    try:
+        import numpy as np  # noqa: F401
+    except ModuleNotFoundError:
+        missing.append("numpy")
+
+    # Optional but strongly recommended for best results with trimesh operations
+    try:
+        import scipy  # noqa: F401
+    except ModuleNotFoundError:
+        missing.append("scipy")
+
+    try:
+        import networkx  # noqa: F401
+    except ModuleNotFoundError:
+        missing.append("networkx")
+
+    if missing:
+        msg = _dependency_error_message(missing)
+        print(msg)
+        # Try to show a GUI error if tkinter is available
+        try:
+            import tkinter as tk
+            from tkinter import messagebox
+
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showerror("Missing dependencies", msg)
+        except Exception:
+            pass
+        raise SystemExit(1)
+
+
+_require_imports()
+
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import trimesh
@@ -80,9 +143,18 @@ class STLFixerApp:
                 print("Filled holes in mesh")
             except Exception as e:
                 print(f"Warning: Could not fill all holes: {e}")
+                if "networkx" in str(e):
+                    print("Hint: install 'networkx' to enable trimesh hole-filling (python -m pip install networkx)")
         
         # Fix normals to ensure they point outward
-        mesh.fix_normals()
+        try:
+            # Avoid trimesh auto-detecting multibody (can require scipy for connected components)
+            mesh.fix_normals(multibody=False)
+        except ModuleNotFoundError as e:
+            # Continue with a best-effort result if optional deps are missing
+            print(f"Warning: Could not fix normals due to missing dependency: {e}")
+            if "scipy" in str(e):
+                print("Hint: install 'scipy' to improve mesh analysis (python -m pip install scipy)")
         
         # Final cleanup
         mesh.merge_vertices()

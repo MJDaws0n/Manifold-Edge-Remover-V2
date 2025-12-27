@@ -25,7 +25,7 @@ source venv/bin/activate
 
 # Install PyInstaller if not already installed
 echo "Installing PyInstaller..."
-pip install pyinstaller
+python -m pip install pyinstaller
 
 echo ""
 

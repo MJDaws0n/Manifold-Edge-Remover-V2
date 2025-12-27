@@ -145,6 +145,8 @@ The executable will be in the `dist/` folder: `dist/STL_Fixer`
 - Dependencies (automatically installed by setup scripts):
   - trimesh >= 4.0.0
   - numpy >= 1.20.0
+   - scipy >= 1.8.0
+   - networkx >= 2.8
 
 ## Manual Installation
 
@@ -190,6 +192,9 @@ If you prefer to install manually:
 - **Permission denied**: Make scripts executable with `chmod +x setup_linux.sh run_linux.sh`
 
 ### Common Issues
+
+- **"No module named install" after running `python -m install ...`**: Use pip instead:
+   - `python -m pip install scipy networkx`
 
 - **Tkinter not found**: On Linux, you may need to install tkinter separately:
   - Ubuntu/Debian: `sudo apt-get install python3-tk`
