@@ -1,3 +1,6 @@
+# **WARNING**
+This is made 100% using co-pilot, I purley checked over the code, there may be security vunerabilities present, or bugs. Review the code you run. I have tested and found no issues, but I'm taking no responsibility for anything that goes wrong.
+
 # STL Manifold Edge Fixer
 
 A cross-platform Python application that fixes non-manifold edges in STL files, making them suitable for 3D printing with Bambu Labs and other 3D printers.
