@@ -26,6 +26,6 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Test files
+# Test and example STL files (except examples directory)
 *.stl
-!test_samples/*.stl
+!examples/*.stl
