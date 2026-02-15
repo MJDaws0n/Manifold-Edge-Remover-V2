@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manifold Edge Remover</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Manifold <span class="accent">Edge Remover</span></h1>
+      <p class="subtitle">Fix non-manifold edges in STL files for 3D printing</p>
+    </header>
+
+    <section class="card credits">
+      <p>Written in <strong>Novus</strong> by <strong>MJDawson</strong></p>
+      <div class="links">
+        <a href="#" onclick="return false;">mjdawson.net</a>
+        <span class="sep">&bull;</span>
+        <a href="#" onclick="return false;">github.com/mjdaws0n</a>
+      </div>
+    </section>
+
+    <section class="card" id="file-section">
+      <h2>Select STL File</h2>
+      <div class="file-row">
+        <button id="select-btn" onclick="selectFile()">Select File</button>
+        <span id="file-name" class="file-label">No file selected</span>
+      </div>
+    </section>
+
+    <section class="card" id="process-section">
+      <h2>Process</h2>
+      <button id="process-btn" onclick="processFile()" disabled>Fix Manifold Edges</button>
+      <div id="progress-container" class="progress-container" style="display:none;">
+        <div class="progress-bar">
+          <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+        </div>
+        <p id="progress-text" class="progress-text">Starting...</p>
+      </div>
+    </section>
+
+    <section class="card" id="result-section" style="display:none;">
+      <h2>Result</h2>
+      <div id="result-content" class="result-content"></div>
+    </section>
+
+    <section class="card log-card" id="log-section">
+      <h2>Log</h2>
+      <div id="log" class="log"></div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
