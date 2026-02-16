@@ -170,7 +170,3 @@ At runtime, the app checks for the `NVWM` magic at the end of its own executable
 - **Hash tables**: Vertex and edge deduplication use open-addressing hash tables stored in `[]i32` arrays
 - **Memory mapping**: STL files are `mmap`'d for zero-copy parsing via `file_mmap_read()`
 - **No heap allocator**: All memory is managed through Novus arrays and string buffers
-
-## License
-
-Made by [MJDawson](https://mjdawson.net) — [github.com/mjdaws0n](https://github.com/mjdaws0n)
