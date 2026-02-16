@@ -1,223 +1,176 @@
-# **WARNING**
-- Application may appear to hang, freeze, lag device, or do nothing, note it does take a while to perform tasks on complex models, so be patient.
-- This is made partially using AI. That means there may be issues. Run at your own risk
+# Manifold Edge Remover
 
-# STL Manifold Edge Fixer
+A native macOS (Apple Silicon) application that fixes non-manifold edges in binary STL files, making them watertight and ready for 3D printing. Written entirely in [Novus](https://github.com/MJDaws0n) with a WebKit-based GUI.
 
-Tutorial:
-[Youtube Tutorial](https://www.youtube.com/watch?v=lYVF4SkotlA)
+## Download from the releases tags
+Download latest version from [here](https://github.com/MJDaws0n/Manifold-Edge-Remover-V2/releases).
 
-A cross-platform Python application that fixes non-manifold edges in STL files, making them suitable for 3D printing with Bambu Labs and other 3D printers.
-
-> **🚀 New to this? Check out the [Quick Start Guide](QUICKSTART.md) for step-by-step instructions!**
+Move to applications folder and run this to mark it as safe:
+```sh
+cd Applications
+xattr -dr com.apple.quarantine ManifoldsEdgeRemover.app
+```
 
 ## Features
 
-- 🖥️ **Cross-platform**: Works on macOS, Windows, and Linux
-- 🎯 **Easy to use**: Simple GUI with file selector
-- 🔧 **Automatic fixing**: Fixes manifold edges, duplicate vertices, degenerate faces, and more
-- 💾 **Safe**: Saves fixed files with `_FIXED` suffix, preserving the original
-- 📦 **Self-contained**: Automatic dependency installation and virtual environment setup
-- 🚀 **Ready for 3D printing**: Optimized for Bambu Labs and other 3D printers
+- **Native ARM64 binary** — no Python, no runtime dependencies, just a single executable
+- **GUI and CLI modes** — select files visually or process from the terminal
+- **Standalone build** — the window manager and web UI are embedded into the binary; distribute a single file
+- **Fixes non-manifold meshes** — removes duplicate faces, caps boundary loops, and produces watertight output
+- **Safe** — saves fixed files with a `_FIXED` suffix, never modifies the original
+- **Fast** — uses memory-mapped I/O and hash tables; processes 600K+ triangle models in seconds
 
-## What Does It Fix?
+## What It Fixes
 
-The application automatically fixes common mesh issues:
-- **Non-manifold edges**: Edges shared by more than two faces
-- **Duplicate vertices**: Multiple vertices at the same position
-- **Degenerate faces**: Faces with zero area
-- **Duplicate faces**: Identical faces in the mesh
-- **Holes**: Small holes in the mesh (when possible)
-- **Normals**: Ensures face normals point outward consistently
+| Issue | How it's fixed |
+|-------|---------------|
+| Non-manifold edges (shared by >2 faces) | Excess duplicate faces removed |
+| Duplicate faces | Detected via vertex-index matching and removed |
+| Boundary edges (holes) | Boundary loops traced and fan-triangulated (capped) |
+
+The output is a watertight binary STL ready for slicers like Bambu Studio, PrusaSlicer, Cura, etc.
 
 ## Quick Start
 
-### macOS
-
-1. **First time setup** (installs dependencies in a virtual environment):
-   ```bash
-   ./setup_mac.sh
-   ```
-
-2. **Run the application**:
-   ```bash
-   ./run_mac.sh
-   ```
-
-### Windows
-
-1. **First time setup**:
-   - Double-click `setup_windows.bat`
-   - Or run in Command Prompt:
-     ```cmd
-     setup_windows.bat
-     ```
-
-2. **Run the application**:
-   - Double-click `run_windows.bat`
-   - Or run in Command Prompt:
-     ```cmd
-     run_windows.bat
-     ```
-
-### Linux
-
-1. **First time setup**:
-   ```bash
-   ./setup_linux.sh
-   ```
-
-2. **Run the application**:
-   ```bash
-   ./run_linux.sh
-   ```
-
-## How to Use
-
-1. Run the application using the appropriate script for your OS
-2. A file selection dialog will appear
-3. Select your STL file
-4. The application will process the file and display progress in the console
-5. The fixed file will be saved in the same directory as the original with `_FIXED` added before the extension
-   - Example: `model.stl` → `model_FIXED.stl`
-6. A success dialog will show you the results
-
-## Building Executables
-
-You can create standalone executables that don't require Python to be installed.
-
 ### Prerequisites
 
-First, install PyInstaller in your virtual environment:
+- macOS on Apple Silicon (M1/M2/M3/M4)
+- The [Novus compiler](https://github.com/MJDaws0n) (`./novus`) in the project root
+- Xcode Command Line Tools (for `clang`): `xcode-select --install`
 
-**macOS/Linux:**
-```bash
-source venv/bin/activate
-pip install pyinstaller
-```
+### Build
 
-**Windows:**
-```cmd
-venv\Scripts\activate.bat
-pip install pyinstaller
-```
-
-### Build Instructions
-
-#### macOS
+**Standalone binary** (single file, can be run from anywhere):
 
 ```bash
-source venv/bin/activate
-pyinstaller --onefile --windowed --name STL_Fixer stl_fixer.py
+./build.sh
 ```
 
-The executable will be in the `dist/` folder: `dist/STL_Fixer`
+This produces two binaries in `build/darwin_arm64/`:
+- `manifold_edge_remover` — dev binary (~170KB, needs the project directory)
+- `manifold_edge_remover_standalone` — standalone binary (~260KB, fully self-contained)
 
-To create a `.app` bundle:
-```bash
-pyinstaller --onedir --windowed --name STL_Fixer stl_fixer.py
-```
-
-#### Windows
-
-```cmd
-venv\Scripts\activate.bat
-pyinstaller --onefile --windowed --name STL_Fixer.exe stl_fixer.py
-```
-
-The executable will be in the `dist\` folder: `dist\STL_Fixer.exe`
-
-#### Linux
+**Dev build only** (if you just want to iterate on the Novus code):
 
 ```bash
-source venv/bin/activate
-pyinstaller --onefile --windowed --name STL_Fixer stl_fixer.py
+./novus application/main.nov
 ```
 
-The executable will be in the `dist/` folder: `dist/STL_Fixer`
+If you've changed the window manager C code, recompile it first:
 
-### PyInstaller Options Explained
+```bash
+clang -O2 -Wall -Wextra -fobjc-arc -x objective-c \
+    lib/mac_silicon_window_manager/unbuilt/app.c \
+    -framework Cocoa -framework WebKit \
+    -o lib/mac_silicon_window_manager/window_manager
+```
 
-- `--onefile`: Creates a single executable file
-- `--windowed`: Hides the console window (GUI mode)
-- `--name`: Sets the name of the executable
-- `--icon`: (Optional) Sets a custom icon for the executable
+### Run
 
-## Requirements
+**GUI mode** (opens a native macOS window):
 
-- Python 3.7 or higher
-- Dependencies (automatically installed by setup scripts):
-  - trimesh >= 4.0.0
-  - numpy >= 1.20.0
-   - scipy >= 1.8.0
-   - networkx >= 2.8
-   - manifold3d >= 3.0.0
-   - scikit-image >= 0.22.0
+```bash
+./build/darwin_arm64/manifold_edge_remover
+```
 
-## Manual Installation
+**CLI mode**:
 
-If you prefer to install manually:
+```bash
+./build/darwin_arm64/manifold_edge_remover --file path/to/model.stl
+```
 
-1. **Create a virtual environment** (recommended):
-   ```bash
-   python3 -m venv venv
-   ```
+Output is saved as `model_FIXED.stl` alongside the original.
 
-2. **Activate the virtual environment**:
-   - macOS/Linux: `source venv/bin/activate`
-   - Windows: `venv\Scripts\activate.bat`
+## How It Works
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Architecture
 
-4. **Run the application**:
-   ```bash
-   python stl_fixer.py
-   ```
+```
+application/main.nov          Main app — STL processing + GUI event loop
+application/web/               HTML/CSS/JS for the GUI (served over localhost)
+lib/
+  standard_lib.nov             String utilities (int_to_str, str_to_i32, etc.)
+  standard_lib_macos_silicon.nov  ARM64 syscall wrappers (print, exit, fork, etc.)
+  mac_silicon_window_manager.nov  Novus bindings for the window manager protocol
+  mac_silicon_window_manager/
+    unbuilt/app.c              Window manager source (Cocoa + WebKit + HTTP server)
+    window_manager             Compiled window manager binary
+  memory.nov                   Memory ops, C-string conversion, byte copying
+  file_io.nov                  File I/O, mmap, pipes, path manipulation
+  process.nov                  Subprocess execution, output capture, file picker
+  maths.nov                    Math utilities (abs, min, max)
+build.sh                       Builds standalone binary with embedded resources
+```
 
-## Troubleshooting
+### STL Processing Pipeline
 
-### macOS
+1. **Memory-map** the input STL file
+2. **Parse vertices** into a hash table to deduplicate (quantised to integer coords)
+3. **Filter faces** — detect and remove exact duplicate triangles
+4. **Edge analysis** — build an edge hash table, count how many faces share each edge
+5. **Boundary capping** — trace boundary edge loops (edges with only 1 face) and fill them with fan triangulation
+6. **Write output** — write a valid binary STL with the corrected face set
 
-- **"Python 3 is not installed"**: Install Python from [python.org](https://www.python.org/downloads/) or use Homebrew: `brew install python3`
-- **Permission denied**: Make scripts executable with `chmod +x setup_mac.sh run_mac.sh`
+### Window Manager
 
-### Windows
+The GUI uses a custom C-based window manager (`lib/mac_silicon_window_manager/unbuilt/app.c`) that:
+- Creates a native `NSWindow` with a `WKWebView`
+- Runs a built-in HTTP server to serve the web UI files
+- Communicates with the Novus app over a UNIX domain socket (`/tmp/novus_wm.sock`)
+- Supports a line-based protocol: `TITLE`, `SERVE`, `NAVIGATE`, `JSEVAL`, `SHOW`, `HIDE`, `QUIT`
+- Bridges JavaScript ↔ Novus via `novusSend()` / `novusOnMessage()` and `JSMSG` socket messages
 
-- **"Python is not installed"**: Install Python from [python.org](https://www.python.org/downloads/) and make sure to check "Add Python to PATH" during installation
-- **Scripts won't run**: Right-click the script and select "Run as administrator"
+### Standalone Binary
 
-### Linux
+The `build.sh` script creates a self-contained executable by appending resources to the binary:
 
-- **"Python 3 is not installed"**: Install using your package manager:
-  - Ubuntu/Debian: `sudo apt-get install python3 python3-venv python3-pip`
-  - Fedora: `sudo dnf install python3 python3-pip`
-  - Arch: `sudo pacman -S python python-pip`
-- **Permission denied**: Make scripts executable with `chmod +x setup_linux.sh run_linux.sh`
+```
+[novus binary][window_manager][index.html][app.js][style.css][4×uint32 sizes][NVWM magic]
+```
 
-### Common Issues
+At runtime, the app checks for the `NVWM` magic at the end of its own executable. If found, it extracts the embedded files to `/tmp/novus_mer/` and uses those instead of the project directory.
 
-- **"No module named install" after running `python -m install ...`**: Use pip instead:
-   - `python -m pip install -r requirements.txt`
+## Project Structure for Development
 
-- **Tkinter not found**: On Linux, you may need to install tkinter separately:
-  - Ubuntu/Debian: `sudo apt-get install python3-tk`
-  - Fedora: `sudo dnf install python3-tkinter`
-  - Arch: `sudo pacman -S tk`
+```
+.
+├── application/
+│   ├── main.nov               # Main application (1024 lines)
+│   └── web/
+│       ├── index.html          # GUI markup
+│       ├── app.js              # GUI logic (novusSend/novusOnMessage bridge)
+│       └── style.css           # macOS-style dark theme
+├── lib/
+│   ├── standard_lib.nov        # String utilities
+│   ├── standard_lib_macos_silicon.nov  # Syscall wrappers
+│   ├── mac_silicon_window_manager.nov  # WM protocol bindings
+│   ├── mac_silicon_window_manager/
+│   │   ├── unbuilt/app.c       # WM source (Obj-C, 783 lines)
+│   │   └── window_manager      # Compiled WM binary
+│   ├── memory.nov              # Memory/byte operations
+│   ├── file_io.nov             # File I/O + path ops
+│   ├── process.nov             # Subprocess + file picker
+│   └── maths.nov               # Math helpers
+├── build.sh                    # Standalone build script
+├── novus                       # Novus compiler binary
+└── readme.md
+```
+
+### Development Workflow
+
+1. Edit `.nov` files or web files
+2. Run `./novus application/main.nov` to compile (~0.5s)
+3. Run `./build/darwin_arm64/manifold_edge_remover` to test
+4. When ready to distribute, run `./build.sh` for the standalone binary
+
+### Key Novus Patterns
+
+- **Syscalls**: All OS interaction is via raw ARM64 syscalls (no libc). Example: `mov(x16, 0x2000005); syscall();` for `open()`
+- **Strings as byte buffers**: Novus strings support `s[i]` byte indexing and are used as raw memory buffers for syscall structs
+- **Hash tables**: Vertex and edge deduplication use open-addressing hash tables stored in `[]i32` arrays
+- **Memory mapping**: STL files are `mmap`'d for zero-copy parsing via `file_mmap_read()`
+- **No heap allocator**: All memory is managed through Novus arrays and string buffers
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
-
-## Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## Acknowledgments
-
-Built with:
-- [Trimesh](https://trimsh.org/) - Powerful mesh processing library
-- [NumPy](https://numpy.org/) - Numerical computing library
-- [SciPy](https://scipy.org/) - Scientific computing library
+Made by [MJDawson](https://mjdawson.net) — [github.com/mjdaws0n](https://github.com/mjdaws0n)

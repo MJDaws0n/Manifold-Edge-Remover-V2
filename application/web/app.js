@@ -64,7 +64,7 @@
     var statusText = 'Mesh is watertight and ready for 3D printing!';
     if (status.indexOf('PARTIAL') === 0) {
       statusClass = 'partial';
-      statusText = 'Mesh improved but may still have minor issues.';
+      statusText = 'Mesh improved but some edges may still need attention.';
     } else if (status.indexOf('ERROR') === 0) {
       statusClass = 'error';
       statusText = status;
@@ -135,6 +135,17 @@
     div.textContent = s;
     return div.innerHTML;
   }
+
+  // -----------------------------------------------------------------------
+  // Quit
+  // -----------------------------------------------------------------------
+  window.quitApp = function () {
+    if (typeof novusSend === 'function') {
+      novusSend('CMD:QUIT');
+    }
+  };
+
+  // Note: no visibilitychange listener — minimize/fullscreen should not quit.
 
   // Send initial ready signal
   setTimeout(function () {
