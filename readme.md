@@ -1,6 +1,6 @@
 # Manifold Edge Remover
 
-A native macOS (Apple Silicon) application that fixes non-manifold edges in binary STL files, making them watertight and ready for 3D printing. Written entirely in [Novus](https://github.com/MJDaws0n) with a WebKit-based GUI.
+A native macOS (Apple Silicon) application that fixes non-manifold edges in binary STL files, making them watertight and ready for 3D printing. Written entirely in [Novus](https://github.com/MJDaws0n/novus) with a WebKit-based GUI.
 
 ## Download from the releases tags
 Download latest version from [here](https://github.com/MJDaws0n/Manifold-Edge-Remover-V2/releases).
