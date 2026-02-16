@@ -35,7 +35,7 @@ The output is a watertight binary STL ready for slicers like Bambu Studio, Prusa
 ### Prerequisites
 
 - macOS on Apple Silicon (M1/M2/M3/M4)
-- The [Novus compiler](https://github.com/MJDaws0n) (`./novus`) in the project root
+- The [Novus compiler](https://github.com/MJDaws0n/novus) (`./novus`) in the project root
 - Xcode Command Line Tools (for `clang`): `xcode-select --install`
 
 ### Build
