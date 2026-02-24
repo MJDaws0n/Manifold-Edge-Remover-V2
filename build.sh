@@ -6,22 +6,22 @@ echo ""
 
 # Paths
 BINARY=build/darwin_arm64/manifold_edge_remover
-WM=lib/mac_silicon_window_manager/window_manager
-HTML=application/web/index.html
-JS=application/web/app.js
-CSS=application/web/style.css
+WM=lib/window/window_manager
+HTML=ui/index.html
+JS=ui/app.js
+CSS=ui/style.css
 STANDALONE="${BINARY}_standalone"
 
 # Step 1: Compile the window manager (C)
 echo "[1/4] Compiling window manager..."
 clang -O2 -Wall -Wextra -fobjc-arc -x objective-c \
-    lib/mac_silicon_window_manager/unbuilt/app.c \
+    lib/window/unbuilt/app.c \
     -framework Cocoa -framework WebKit \
     -o "$WM"
 
 # Step 2: Compile the Novus application
 echo "[2/4] Compiling Novus application..."
-./novus application/main.nov
+novus main.nov
 
 # Step 3: Get file sizes
 WM_SIZE=$(stat -f%z "$WM")

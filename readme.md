@@ -35,8 +35,19 @@ The output is a watertight binary STL ready for slicers like Bambu Studio, Prusa
 ### Prerequisites
 
 - macOS on Apple Silicon (M1/M2/M3/M4)
-- The [Novus compiler](https://github.com/MJDaws0n/novus) (`./novus`) in the project root
+- The [Novus compiler](https://github.com/MJDaws0n/Novus) installed globally (`novus`)
+- The [Nox package manager](https://github.com/MJDaws0n/Nox) installed globally (`nox`)
 - Xcode Command Line Tools (for `clang`): `xcode-select --install`
+
+### Setup
+
+```bash
+nox init        # creates lib/ directory and pulls dependencies
+nox pull window  # pull the window manager package
+nox pull file_io
+nox pull process
+nox pull maths
+```
 
 ### Build
 
@@ -53,16 +64,7 @@ This produces two binaries in `build/darwin_arm64/`:
 **Dev build only** (if you just want to iterate on the Novus code):
 
 ```bash
-./novus application/main.nov
-```
-
-If you've changed the window manager C code, recompile it first:
-
-```bash
-clang -O2 -Wall -Wextra -fobjc-arc -x objective-c \
-    lib/mac_silicon_window_manager/unbuilt/app.c \
-    -framework Cocoa -framework WebKit \
-    -o lib/mac_silicon_window_manager/window_manager
+novus application/main.nov
 ```
 
 ### Run
@@ -88,18 +90,16 @@ Output is saved as `model_FIXED.stl` alongside the original.
 ```
 application/main.nov          Main app — STL processing + GUI event loop
 application/web/               HTML/CSS/JS for the GUI (served over localhost)
-lib/
-  standard_lib.nov             String utilities (int_to_str, str_to_i32, etc.)
-  standard_lib_macos_silicon.nov  ARM64 syscall wrappers (print, exit, fork, etc.)
-  mac_silicon_window_manager.nov  Novus bindings for the window manager protocol
-  mac_silicon_window_manager/
+lib/                           Nox-managed packages (gitignored)
+  std/                         Standard library (strings, core, memory, syscalls)
+  window/                     Window manager (WebKit, UNIX socket protocol)
     unbuilt/app.c              Window manager source (Cocoa + WebKit + HTTP server)
     window_manager             Compiled window manager binary
-  memory.nov                   Memory ops, C-string conversion, byte copying
-  file_io.nov                  File I/O, mmap, pipes, path manipulation
-  process.nov                  Subprocess execution, output capture, file picker
-  maths.nov                    Math utilities (abs, min, max)
+  file_io/                    File I/O, mmap, pipes, path manipulation
+  process/                    Subprocess execution, output capture, file picker
+  maths/                      Math utilities (abs, min, max)
 build.sh                       Builds standalone binary with embedded resources
+libraries.conf                 Nox package manifest (gitignored)
 ```
 
 ### STL Processing Pipeline
@@ -113,7 +113,7 @@ build.sh                       Builds standalone binary with embedded resources
 
 ### Window Manager
 
-The GUI uses a custom C-based window manager (`lib/mac_silicon_window_manager/unbuilt/app.c`) that:
+The GUI uses a custom C-based window manager (`lib/window/unbuilt/app.c`) that:
 - Creates a native `NSWindow` with a `WKWebView`
 - Runs a built-in HTTP server to serve the web UI files
 - Communicates with the Novus app over a UNIX domain socket (`/tmp/novus_wm.sock`)
@@ -135,33 +135,29 @@ At runtime, the app checks for the `NVWM` magic at the end of its own executable
 ```
 .
 ├── application/
-│   ├── main.nov               # Main application (1024 lines)
+│   ├── main.nov               # Main application (~1000 lines)
 │   └── web/
 │       ├── index.html          # GUI markup
 │       ├── app.js              # GUI logic (novusSend/novusOnMessage bridge)
 │       └── style.css           # macOS-style dark theme
-├── lib/
-│   ├── standard_lib.nov        # String utilities
-│   ├── standard_lib_macos_silicon.nov  # Syscall wrappers
-│   ├── mac_silicon_window_manager.nov  # WM protocol bindings
-│   ├── mac_silicon_window_manager/
-│   │   ├── unbuilt/app.c       # WM source (Obj-C, 783 lines)
-│   │   └── window_manager      # Compiled WM binary
-│   ├── memory.nov              # Memory/byte operations
-│   ├── file_io.nov             # File I/O + path ops
-│   ├── process.nov             # Subprocess + file picker
-│   └── maths.nov               # Math helpers
+├── lib/                        # Nox packages (gitignored, pulled via nox)
+│   ├── std/                    # Standard library
+│   ├── window/                 # Window manager + binary
+│   ├── file_io/                # File I/O operations
+│   ├── process/                # Subprocess utilities
+│   └── maths/                  # Math helpers
 ├── build.sh                    # Standalone build script
-├── novus                       # Novus compiler binary
+├── libraries.conf              # Nox package manifest (gitignored)
 └── readme.md
 ```
 
 ### Development Workflow
 
-1. Edit `.nov` files or web files
-2. Run `./novus application/main.nov` to compile (~0.5s)
-3. Run `./build/darwin_arm64/manifold_edge_remover` to test
-4. When ready to distribute, run `./build.sh` for the standalone binary
+1. Run `nox init` and pull packages (first time only)
+2. Edit `.nov` files or web files
+3. Run `novus application/main.nov` to compile (~3s)
+4. Run `./build/darwin_arm64/manifold_edge_remover` to test
+5. When ready to distribute, run `./build.sh` for the standalone binary
 
 ### Key Novus Patterns
 
