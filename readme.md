@@ -37,16 +37,12 @@ The output is a watertight binary STL ready for slicers like Bambu Studio, Prusa
 - macOS on Apple Silicon (M1/M2/M3/M4)
 - The [Novus compiler](https://github.com/MJDaws0n/Novus) installed globally (`novus`)
 - The [Nox package manager](https://github.com/MJDaws0n/Nox) installed globally (`nox`)
-- Xcode Command Line Tools (for `clang`): `xcode-select --install`
+- Python3 for building the standalone executable (should be included with macos)
 
 ### Setup
 
 ```bash
 nox init        # creates lib/ directory and pulls dependencies
-nox pull window  # pull the window manager package
-nox pull file_io
-nox pull process
-nox pull maths
 ```
 
 ### Build
